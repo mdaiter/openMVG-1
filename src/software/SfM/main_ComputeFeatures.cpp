@@ -8,7 +8,7 @@
 
 #include "openMVG/features/image_describer_akaze.hpp"
 
-#ifdef OpenMVG_USE_CUDA
+#ifdef OPENMVG_USE_CUDA
 #include "openMVG/features/image_describer_latch.hpp"
 #endif
 
@@ -101,7 +101,10 @@ int main(int argc, char **argv)
       << "   SIFT (default),\n"
       << "   SIFT_ANATOMY,\n"
       << "   AKAZE_FLOAT: AKAZE with floating point descriptors,\n"
-      << "   AKAZE_MLDB:  AKAZE with binary descriptors\n"
+      << "   AKAZE_MLDB:  AKAZE with binary descriptors,\n"
+#ifdef OPENMVG_USE_CUDA
+      << "   KORAL: CUDA-enabled LATCH binary descriptor\n"
+#endif
       << "[-u|--upright] Use Upright feature 0 or 1\n"
       << "[-p|--describerPreset]\n"
       << "  (used to control the Image_describer configuration):\n"
@@ -210,6 +213,14 @@ int main(int argc, char **argv)
       image_describer.reset(new AKAZE_Image_describer
         (AKAZE_Image_describer::Params(AKAZE::Params(), AKAZE_MLDB), !bUpRight));
     }
+#ifdef OPENMVG_USE_CUDA
+    else
+    if (sImage_Describer_Method == "KORAL")
+    {
+      image_describer.reset(new LATCH_Image_describer
+        (LATCH_Image_describer::Params(LATCH_BINARY)));
+    }
+#endif
     if (!image_describer)
     {
       std::cerr << "Cannot create the designed Image_describer:"

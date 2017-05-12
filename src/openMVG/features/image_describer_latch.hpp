@@ -14,7 +14,7 @@
 #include "openMVG/features/regions_factory.hpp"
 #include <cereal/cereal.hpp>
 
-#ifdef OpenMVG_USE_CUDA
+#ifdef OPENMVG_USE_CUDA
 #include "third_party/koral/KORAL.h"
 #endif
 
@@ -22,7 +22,7 @@
 #include <xmmintrin.h>
 #endif
 
-#ifdef OpenMVG_USE_CUDA
+#ifdef OPENMVG_USE_CUDA
 
 using namespace std;
 
@@ -34,27 +34,28 @@ enum ELATCH_DESCRIPTOR
   LATCH_BINARY
 };
 
-struct LATCHParams
-{
-  LATCHParams(
-    ELATCH_DESCRIPTOR eLatchDescriptor = LATCH_BINARY
-  ):eLatchDescriptor_(eLatchDescriptor){}
-
-  template<class Archive>
-  void serialize(Archive & ar)
-  {
-    ar(eLatchDescriptor_);
-  }
-
-  // Parameters
-  ELATCH_DESCRIPTOR eLatchDescriptor_;
-};
-
 class LATCH_Image_describer : public Image_describer
 {
 public:
+
+  struct Params
+  {
+    Params(
+      ELATCH_DESCRIPTOR eLatchDescriptor = features::ELATCH_DESCRIPTOR::LATCH_BINARY
+    ):eLatchDescriptor_(eLatchDescriptor){}
+
+    template<class Archive>
+    void serialize(Archive & ar)
+    {
+      ar(eLatchDescriptor_);
+    }
+
+    // Parameters
+    features::ELATCH_DESCRIPTOR eLatchDescriptor_;
+  };
+
   LATCH_Image_describer(
-  const LATCHParams & params = LATCHParams()
+  const Params & params = Params()
   ):Image_describer(), params_(params), koral_(1.2f, 8) {
         }
 
@@ -142,7 +143,7 @@ public:
 
 
 private:
-  LATCHParams params_;
+  Params params_;
   bool bOrientation_;
   KORAL koral_;
 };
@@ -156,4 +157,4 @@ CEREAL_REGISTER_TYPE_WITH_NAME(openMVG::features::LATCH_Image_describer, "LATCH_
 CEREAL_REGISTER_POLYMORPHIC_RELATION(openMVG::features::Image_describer, openMVG::features::LATCH_Image_describer)
 #endif // OPENMVG_FEATURES_LATCH_IMAGE_DESCRIBER_HPP
 
-#endif // OpenMVG_USE_CUDA
+#endif // OPENMVG_USE_CUDA
